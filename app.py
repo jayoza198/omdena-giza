@@ -1,13 +1,13 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-from sklearn import preprocessing
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
 
 # Load the data
-df = pd.read_csv("/content/drive/MyDrive/CSV files/Omdena-Giza/tweet_data_clean.csv")
+df = pd.read_csv("tweet_data_clean.csv")
 
 # Drop the irrelevant columns
 df = df.drop(["Unnamed: 0", "type_of_disaster", "hashtags"], axis=1)
@@ -16,33 +16,31 @@ df = df.drop(["Unnamed: 0", "type_of_disaster", "hashtags"], axis=1)
 X = df["tweet_text"]
 y = df["disaster"]
 
-# Remove the spaces from the strings
-X = X.str.strip()
-
-# Scale the data
-scaler = preprocessing.StandardScaler()
-
-X_scaled = scaler.fit_transform(X)
-
 # Split the data into training and test sets
-X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.25)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+
+# Create a vectorizer
+vectorizer = TfidfVectorizer(stop_words="english")
+
+# Fit the vectorizer to the training data
+vectorizer.fit(X_train)
 
 # Create the model
-model = LogisticRegression(max_iter=1000)
+model = LogisticRegression()
 
 # Fit the model to the training data
-model.fit(X_train, y_train)
+model.fit(vectorizer.transform(X_train), y_train)
 
 # Create a function to predict whether a tweet is a disaster
 def predict_disaster(text):
     # Create the features
     X = [text]
 
-    # Scale the data
-    X_scaled = scaler.transform(X)
+    # Vectorize the features
+    X_vectorized = vectorizer.transform(X)
 
     # Predict the label
-    prediction = model.predict(X_scaled)
+    prediction = model.predict(X_vectorized)
 
     return prediction[0]
 
