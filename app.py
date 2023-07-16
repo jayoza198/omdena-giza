@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
@@ -16,31 +16,30 @@ df = df.drop(["Unnamed: 0", "type_of_disaster", "hashtags"], axis=1)
 X = df["tweet_text"]
 y = df["disaster"]
 
+# Scale the data
+scaler = StandardScaler()
+
+X_scaled = scaler.fit_transform(X)
+
 # Split the data into training and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
-
-# Create a vectorizer
-vectorizer = TfidfVectorizer(stop_words="english")
-
-# Fit the vectorizer to the training data
-vectorizer.fit(X_train)
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.25)
 
 # Create the model
-model = LogisticRegression()
+model = LogisticRegression(max_iter=1000)
 
 # Fit the model to the training data
-model.fit(vectorizer.transform(X_train), y_train)
+model.fit(X_train, y_train)
 
 # Create a function to predict whether a tweet is a disaster
 def predict_disaster(text):
     # Create the features
     X = [text]
 
-    # Vectorize the features
-    X_vectorized = vectorizer.transform(X)
+    # Scale the data
+    X_scaled = scaler.transform(X)
 
     # Predict the label
-    prediction = model.predict(X_vectorized)
+    prediction = model.predict(X_scaled)
 
     return prediction[0]
 
