@@ -1,13 +1,13 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
+from sklearn import preprocessing
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
 
 # Load the data
-df = pd.read_csv("tweet_data_clean.csv")
+df = pd.read_csv("/content/drive/MyDrive/CSV files/Omdena-Giza/tweet_data_clean.csv")
 
 # Drop the irrelevant columns
 df = df.drop(["Unnamed: 0", "type_of_disaster", "hashtags"], axis=1)
@@ -16,8 +16,11 @@ df = df.drop(["Unnamed: 0", "type_of_disaster", "hashtags"], axis=1)
 X = df["tweet_text"]
 y = df["disaster"]
 
+# Remove the spaces from the strings
+X = X.str.strip()
+
 # Scale the data
-scaler = StandardScaler()
+scaler = preprocessing.StandardScaler()
 
 X_scaled = scaler.fit_transform(X)
 
